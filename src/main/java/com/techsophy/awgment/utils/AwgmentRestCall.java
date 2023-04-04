@@ -2,6 +2,7 @@ package com.techsophy.awgment.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.techsophy.awgment.dto.UserDataPayload;
 import com.techsophy.awgment.dto.UserRequestPayload;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -27,20 +28,25 @@ public class AwgmentRestCall {
                                         String clientId,
                                         String identityProvider) {
         try {
-            String url = ADD_USER_ENDPOINT+eventType+"/"+realm+"/"+clientId+"/"+identityProvider;
-            UserRequestPayload payload = new UserRequestPayload(userName, firstName, lastName, mobileNo, email, "default", userId);
+            log.info("addUserToAwgment 01");
+            UserDataPayload userData = new UserDataPayload(userName, firstName, lastName, mobileNo, email, "default");
+            UserRequestPayload payload = new UserRequestPayload(userData, realm);
+            log.info("addUserToAwgment 02");
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(payload);
+            log.info("addUserToAwgment 03: "+json);
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost request = new HttpPost(url);
             Rsa4096 rsa4096 = new Rsa4096();
-            request.setHeader(API_SIGNATURE_KEY, rsa4096.encryptToBase64(userId));
+            String signature = rsa4096.encryptToBase64(realm+userName);
+            log.info("addUserToAwgment 04"+signature);
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            HttpPost request = new HttpPost(ADD_USER_ENDPOINT+"/?"+API_SIGNATURE_KEY+"="+signature);
             request.setEntity(entity);
+            log.info("addUserToAwgment 05"+ADD_USER_ENDPOINT+"/?"+API_SIGNATURE_KEY+"="+signature);
             HttpResponse response = httpClient.execute(request);
             System.out.println(response.getStatusLine().getStatusCode());
         } catch (Exception ex) {
-            // Handle errors
+            ex.printStackTrace();
         }
     }
 }
