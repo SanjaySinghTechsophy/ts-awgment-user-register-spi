@@ -45,6 +45,7 @@ public class AwgmentRestCall {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(payload);
             log.info("addUserToAwgment 03: "+json);
+
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             log.info("addUserToAwgment 04"+signature);
             HttpClient httpClient = HttpClientBuilder.create().build();
