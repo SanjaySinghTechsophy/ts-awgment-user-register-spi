@@ -54,6 +54,10 @@ public class SampleEventListenerProvider implements EventListenerProvider {
         log.info("User Id: "+event.getUserId());
         log.info("Client Id: "+event.getClientId());
         log.info("Identity Provider: "+event.getDetails().get("identity_provider"));
+        RealmModel realmModel = session.realms().getRealm(event.getRealmId());
+        UserModel user = session.users().getUserById(event.getUserId(), realmModel);
+
+        user.setSingleAttribute("userId", event.getUserId());
         AwgmentRestCall.addUserToAwgment(
                 event.getType().name(),
                 newRegisteredUser.getUsername(),
