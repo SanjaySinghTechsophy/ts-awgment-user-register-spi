@@ -58,7 +58,7 @@ public class Rsa4096 {
     public String encryptToBase64(String plainText) {
         String encoded = null;
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWITHSHA-256ANDMGF1PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             byte[] encrypted = cipher.doFinal(plainText.getBytes());
             encoded = Base64.getEncoder().encodeToString(encrypted);
