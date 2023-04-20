@@ -1,9 +1,7 @@
 package com.techsophy.awgment.utils;
 
-import javax.crypto.Cipher;
 import java.io.InputStream;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
@@ -48,17 +46,12 @@ public class Rsa4096 {
         privateKey = keyFactory.generatePrivate(keySpec);
     }
 
-    public String encryptToBase64(String plainText) {
-        String encoded = null;
-        try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
-            cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-            byte[] encrypted = cipher.doFinal(plainText.getBytes());
-            encoded = Base64.getEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return encoded;
+    public String generateSignature(String value) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sign = Signature.getInstance("NONEwithRSA");
+        sign.initSign(privateKey);
+        byte[] bytes = value.getBytes();
+        sign.update(bytes);
+        return Base64.getEncoder().encodeToString(sign.sign());
     }
 }
 

@@ -40,15 +40,14 @@ public class AwgmentRestCall {
             {
                 mobileNo = "9892676484";
             }
-            String signature = rsa4096.encryptToBase64(realm+userName);
+            String signature = rsa4096.generateSignature(userName);
             UserDataPayload userData = new UserDataPayload(userName, firstName, lastName, mobileNo, email, "default",signature,realm);
             UserRequestPayload payload = new UserRequestPayload(userData, realm);
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String json = ow.writeValueAsString(payload);
-
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost request = new HttpPost(ADD_USER_ENDPOINT+"/?"+API_SIGNATURE_KEY+"="+signature);
+            HttpPost request = new HttpPost(ADD_USER_ENDPOINT+"/?"+API_SIGNATURE_KEY+"="+"signature");
             request.setEntity(entity);
             HttpResponse response = httpClient.execute(request);
             if(response.getStatusLine().getStatusCode() == 200) {

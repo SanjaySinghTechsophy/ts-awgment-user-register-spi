@@ -10,7 +10,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmProvider;
 import org.keycloak.models.UserModel;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 
