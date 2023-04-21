@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.techsophy.awgment.dto.UserDataPayload;
 import com.techsophy.awgment.dto.UserRequestPayload;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -23,23 +26,17 @@ public class AwgmentRestCall {
     }
 
     private static final Logger log = Logger.getLogger("AwgmentRestCall");
-    public static String addUserToAwgment(String eventType,
-                                        String userName,
+    public static String addUserToAwgment(String userName,
                                         String firstName,
                                         String lastName,
                                         String mobileNo,
                                         String userId,
                                         String email,
-                                        String realm,
-                                        String clientId,
-                                        String identityProvider) {
+                                        String realm) {
         try {
-            log.info("addUserToAwgment 01");
             Rsa4096 rsa4096 = new Rsa4096();
-            if(mobileNo.isEmpty() || mobileNo.equals(null))
-            {
+            if(mobileNo == null || mobileNo.isEmpty())
                 mobileNo = "9892676484";
-            }
             String signature = rsa4096.generateSignature(userName);
             UserDataPayload userData = new UserDataPayload(userName, firstName, lastName, mobileNo, email, "default",signature,realm);
             UserRequestPayload payload = new UserRequestPayload(userData, realm);
@@ -47,18 +44,20 @@ public class AwgmentRestCall {
             String json = ow.writeValueAsString(payload);
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost request = new HttpPost(ADD_USER_ENDPOINT+"/?"+API_SIGNATURE_KEY+"="+"signature");
+            HttpPost request = new HttpPost(ADD_USER_ENDPOINT);
+            request.setHeader("X-Signature", signature);
+            log.info("Test 01");
             request.setEntity(entity);
+            log.info("Test 02");
             HttpResponse response = httpClient.execute(request);
+            log.info("Test 03");
             if(response.getStatusLine().getStatusCode() == 200) {
                 String result = EntityUtils.toString(response.getEntity());
                 JSONObject jsonObject = new JSONObject(result);
-                String id = jsonObject.getJSONObject("data").getString("userId");
-                return id;
-            }
-            else
-            {
-                throw new RuntimeException("Not succeeded");
+                return jsonObject.getJSONObject("data").getString("userId");
+
+            } else {
+                throw new HttpResponseException(HttpStatus.SC_INTERNAL_SERVER_ERROR,"Request failed due to Server error");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
