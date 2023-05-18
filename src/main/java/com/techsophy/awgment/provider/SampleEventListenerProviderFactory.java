@@ -19,17 +19,17 @@ public class SampleEventListenerProviderFactory implements EventListenerProvider
 
     @Override
     public void init(Config.Scope scope) {
-
+        //Initiate the Listener
     }
 
     @Override
     public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
-
+            //Post Initiate the Listener
     }
 
     @Override
     public void close() {
-
+        //Close the Listener
     }
 
     @Override
